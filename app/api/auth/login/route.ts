@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validation";
 import { badRequest } from "@/lib/http";
 import bcrypt from "bcryptjs";
@@ -20,7 +21,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { prisma } = await import("@/lib/prisma");
     const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
     if (!user) return badRequest("Invalid credentials");
 
@@ -31,8 +31,7 @@ export async function POST(request: Request) {
     const accessToken = await signAccessToken(payload);
     const refreshToken = await signRefreshToken(payload);
 
-    const { prisma: prismaWrite } = await import("@/lib/prisma");
-    await prismaWrite.refreshToken.create({
+    await prisma.refreshToken.create({
       data: {
         userId: user.id,
         tokenHash: hashToken(refreshToken),

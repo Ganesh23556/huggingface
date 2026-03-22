@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { unauthorized } from "@/lib/http";
 
 export async function POST(_: Request, { params }: { params: { id: string } }) {
@@ -10,7 +11,6 @@ export async function POST(_: Request, { params }: { params: { id: string } }) {
   const subjectId = Number(params.id);
   
   try {
-    const { prisma } = await import("@/lib/prisma");
     const enrollment = await prisma.enrollment.upsert({
       where: { userId_subjectId: { userId: user.userId, subjectId } },
       create: { userId: user.userId, subjectId },

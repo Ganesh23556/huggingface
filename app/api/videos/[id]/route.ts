@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { checkVideoLock } from "@/lib/learning";
 import { forbidden, unauthorized } from "@/lib/http";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   const user = await requireAuth();
@@ -13,7 +14,6 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   if (!lock.currentVideo) return NextResponse.json({ error: "Video not found" }, { status: 404 });
 
   try {
-    const { prisma } = await import("@/lib/prisma");
     const enrolled = await prisma.enrollment.findUnique({
       where: {
         userId_subjectId: {

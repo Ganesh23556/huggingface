@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { unauthorized } from "@/lib/http";
 
 export async function GET() {
@@ -8,7 +9,6 @@ export async function GET() {
   if (!user) return unauthorized();
 
   try {
-    const { prisma } = await import("@/lib/prisma");
     const enrollmentsData = await prisma.enrollment.findMany({
       where: { userId: user.userId },
       include: {
@@ -68,7 +68,6 @@ export async function POST(request: Request) {
     }
 
     const sid = parseInt(subjectId);
-    const { prisma } = await import("@/lib/prisma");
 
     // Check if subject exists
     const subject = await prisma.subject.findUnique({

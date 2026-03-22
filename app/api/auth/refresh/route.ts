@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { REFRESH_COOKIE, setAuthCookies } from "@/lib/auth";
 import { hashToken, signAccessToken, signRefreshToken, verifyToken } from "@/lib/jwt";
+import { prisma } from "@/lib/prisma";
 import { unauthorized } from "@/lib/http";
 
 export async function POST() {
@@ -12,7 +13,6 @@ export async function POST() {
   try {
     const payload = await verifyToken<{ userId: number; email: string; name: string }>(refreshToken);
     try {
-      const { prisma } = await import("@/lib/prisma");
       const tokenRecord = await prisma.refreshToken.findFirst({
         where: {
           userId: payload.userId,

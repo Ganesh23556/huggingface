@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { unauthorized, badRequest } from "@/lib/http";
 
 export async function POST(req: Request) {
@@ -11,7 +12,6 @@ export async function POST(req: Request) {
   if (!videoId) return badRequest("videoId is required");
 
   try {
-    const { prisma } = await import("@/lib/prisma");
     const progress = await prisma.videoProgress.upsert({
       where: {
         userId_videoId: {

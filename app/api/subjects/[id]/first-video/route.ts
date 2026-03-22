@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { forbidden, notFound, unauthorized } from "@/lib/http";
+import { prisma } from "@/lib/prisma";
 import { getOrderedVideosForSubject } from "@/lib/learning";
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
@@ -11,7 +12,6 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   const subjectId = Number(params.id);
   
   try {
-    const { prisma } = await import("@/lib/prisma");
     const enrolled = await prisma.enrollment.findUnique({
       where: { userId_subjectId: { userId: user.userId, subjectId } },
     });

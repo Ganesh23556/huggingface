@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { checkVideoLock } from "@/lib/learning";
 import { forbidden, unauthorized } from "@/lib/http";
+import { prisma } from "@/lib/prisma";
 import { progressSchema } from "@/lib/validation";
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
@@ -12,7 +13,6 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   const videoId = Number(params.id);
   
   try {
-    const { prisma } = await import("@/lib/prisma");
     const progress = await prisma.videoProgress.findUnique({
       where: { userId_videoId: { userId: user.userId, videoId } },
     });
@@ -38,7 +38,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const payload = parsed.data;
   
   try {
-    const { prisma } = await import("@/lib/prisma");
     const progress = await prisma.videoProgress.upsert({
       where: { userId_videoId: { userId: user.userId, videoId } },
       create: {

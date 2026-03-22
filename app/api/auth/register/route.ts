@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validation";
 import { badRequest } from "@/lib/http";
 import bcrypt from "bcryptjs";
@@ -13,7 +14,6 @@ export async function POST(request: Request) {
   if (!parsed.success) return badRequest(parsed.error.flatten().formErrors.join(", ") || "Invalid input");
 
   try {
-    const { prisma } = await import("@/lib/prisma");
     const existing = await prisma.user.findUnique({ where: { email: parsed.data.email } });
     if (existing) return badRequest("Email already in use");
 
@@ -30,8 +30,7 @@ export async function POST(request: Request) {
     const accessToken = await signAccessToken(payload);
     const refreshToken = await signRefreshToken(payload);
 
-    const { prisma: prismaWrite } = await import("@/lib/prisma");
-    await prismaWrite.refreshToken.create({
+    await prisma.refreshToken.create({
       data: {
         userId: user.id,
         tokenHash: hashToken(refreshToken),

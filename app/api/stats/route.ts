@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { unauthorized } from "@/lib/http";
 
 export async function GET() {
@@ -8,8 +9,6 @@ export async function GET() {
   if (!user) return unauthorized();
 
   const userId = user.userId;
-
-  const { prisma } = await import("@/lib/prisma");
 
   // 1. Total Enrollments
   const totalEnrollments = await prisma.enrollment.count({
