@@ -4,9 +4,12 @@ export async function POST(req: Request) {
   try {
     const { message } = await req.json();
 
-    if (!process.env.HUGGINGFACE_API_KEY) {
+    const apiKey = process.env.HUGGINGFACE_API_KEY;
+    console.log("HF KEY EXISTS:", !!apiKey);
+
+    if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: "Missing API key" }),
+        JSON.stringify({ error: "Missing HUGGINGFACE_API_KEY" }),
         { status: 500 }
       );
     }
@@ -16,7 +19,7 @@ export async function POST(req: Request) {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
