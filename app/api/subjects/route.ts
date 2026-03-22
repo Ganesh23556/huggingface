@@ -4,6 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { demoSubjects } from "@/lib/demo-data";
 
 export async function GET() {
+  if (!process.env.DATABASE_URL) {
+    return new Response(
+      JSON.stringify({ error: "Database not configured" }),
+      { status: 500 }
+    );
+  }
+
   try {
     const subjects = await prisma.subject.findMany({
       where: { isPublished: true },

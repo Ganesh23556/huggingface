@@ -13,6 +13,13 @@ export async function POST(request: Request) {
   const parsed = loginSchema.safeParse(body);
   if (!parsed.success) return badRequest("Invalid credentials");
 
+  if (!process.env.DATABASE_URL) {
+    return new Response(
+      JSON.stringify({ error: "Database not configured" }),
+      { status: 500 }
+    );
+  }
+
   try {
     const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
     if (!user) return badRequest("Invalid credentials");
