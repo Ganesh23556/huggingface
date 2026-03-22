@@ -4,6 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "@/lib/http";
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
+  if (!process.env.DATABASE_URL) {
+    return new Response(
+      JSON.stringify({ error: "Database not configured" }),
+      { status: 500 }
+    );
+  }
+
   const id = Number(params.id);
 
   const subject = await prisma.subject.findUnique({
