@@ -1,11 +1,13 @@
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request) {
+export async function POST(req) {
   try {
     const { message } = await req.json();
 
     const apiKey = process.env.HUGGINGFACE_API_KEY;
-    console.log("HF KEY EXISTS:", !!apiKey);
+
+    // Optional debug
+    console.log("HF KEY EXISTS:", !!process.env.HUGGINGFACE_API_KEY);
 
     if (!apiKey) {
       return new Response(
@@ -23,7 +25,7 @@ export async function POST(req: Request) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: `You are a helpful AI tutor. Answer clearly: ${message}`,
+          inputs: `You are a helpful LMS AI tutor. Answer clearly: ${message}`,
         }),
       }
     );
@@ -36,7 +38,7 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ reply }));
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: "AI failed" }),
+      JSON.stringify({ error: "AI error occurred" }),
       { status: 500 }
     );
   }
