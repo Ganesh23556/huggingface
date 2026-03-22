@@ -1,56 +1,60 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { unauthorized } from "@/lib/http";
 
 export async function GET() {
   const user = await requireAuth();
   if (!user) return unauthorized();
 
-  const enrollmentsData = await prisma.enrollment.findMany({
-    where: { userId: user.userId },
-    include: {
-      subject: {
-        include: {
-          sections: {
-            include: {
-              videos: {
-                select: { id: true }
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const enrollmentsData = await prisma.enrollment.findMany({
+      where: { userId: user.userId },
+      include: {
+        subject: {
+          include: {
+            sections: {
+              include: {
+                videos: {
+                  select: { id: true }
+                }
               }
             }
           }
         }
-      }
-    },
-  });
-
-  const enrollments = await Promise.all(enrollmentsData.map(async (en) => {
-    const allVideoIds = en.subject.sections.flatMap(s => s.videos.map(v => v.id));
-    const totalVideos = allVideoIds.length;
-    
-    const completedVideosCount = await prisma.videoProgress.count({
-      where: {
-        userId: user.userId,
-        videoId: { in: allVideoIds },
-        isCompleted: true
-      }
+      },
     });
 
-    const progressPercentage = totalVideos > 0 ? Math.round((completedVideosCount / totalVideos) * 100) : 0;
+    const enrollments = await Promise.all(enrollmentsData.map(async (en) => {
+      const allVideoIds = en.subject.sections.flatMap(s => s.videos.map(v => v.id));
+      const totalVideos = allVideoIds.length;
+      
+      const completedVideosCount = await prisma.videoProgress.count({
+        where: {
+          userId: user.userId,
+          videoId: { in: allVideoIds },
+          isCompleted: true
+        }
+      });
 
-    return {
-      subject: {
-        id: en.subject.id,
-        title: en.subject.title,
-        description: en.subject.description,
-        thumbnail: en.subject.thumbnail,
-      },
-      progressPercentage
-    };
-  }));
+      const progressPercentage = totalVideos > 0 ? Math.round((completedVideosCount / totalVideos) * 100) : 0;
 
-  return NextResponse.json({ enrollments });
+      return {
+        subject: {
+          id: en.subject.id,
+          title: en.subject.title,
+          description: en.subject.description,
+          thumbnail: en.subject.thumbnail,
+        },
+        progressPercentage
+      };
+    }));
+
+    return NextResponse.json({ enrollments });
+  } catch (error) {
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -64,6 +68,7 @@ export async function POST(request: Request) {
     }
 
     const sid = parseInt(subjectId);
+    const { prisma } = await import("@/lib/prisma");
 
     // Check if subject exists
     const subject = await prisma.subject.findUnique({

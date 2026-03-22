@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { unauthorized, badRequest } from "@/lib/http";
 
 export async function POST(req: Request) {
@@ -11,24 +10,29 @@ export async function POST(req: Request) {
   const { videoId } = await req.json();
   if (!videoId) return badRequest("videoId is required");
 
-  const progress = await prisma.videoProgress.upsert({
-    where: {
-      userId_videoId: {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const progress = await prisma.videoProgress.upsert({
+      where: {
+        userId_videoId: {
+          userId: user.userId,
+          videoId: Number(videoId),
+        },
+      },
+      update: {
+        isCompleted: true,
+        completedAt: new Date(),
+      },
+      create: {
         userId: user.userId,
         videoId: Number(videoId),
+        isCompleted: true,
+        completedAt: new Date(),
       },
-    },
-    update: {
-      isCompleted: true,
-      completedAt: new Date(),
-    },
-    create: {
-      userId: user.userId,
-      videoId: Number(videoId),
-      isCompleted: true,
-      completedAt: new Date(),
-    },
-  });
+    });
 
-  return NextResponse.json({ progress });
+    return NextResponse.json({ progress });
+  } catch (error) {
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
 }

@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { demoSubjects } from "@/lib/demo-data";
 
 export async function GET() {
@@ -12,6 +11,7 @@ export async function GET() {
   }
 
   try {
+    const { prisma } = await import("@/lib/prisma");
     const subjects = await prisma.subject.findMany({
       where: { isPublished: true },
       select: {
