@@ -1,115 +1,101 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await bcrypt.hash("demo123", 10);
+  console.log("Starting seeding...");
 
-  const demoUser = await prisma.user.upsert({
-    where: { email: "demo@lms.com" },
+  // 1. Java Basics Course
+  const javaBasics = await prisma.subject.upsert({
+    where: { id: 1 },
     update: {},
     create: {
-      email: "demo@lms.com",
-      name: "Demo Student",
-      passwordHash,
-    },
-  });
-
-  const courses = [
-    {
-      id: 101,
-      title: "Full Stack Web Development",
-      description: "Build production apps with React, Next.js, APIs, and databases.",
-    },
-    {
-      id: 102,
-      title: "UI/UX Design Masterclass",
-      description: "Learn professional design principles, wireframing, and high-fidelity prototyping.",
-    },
-    {
-      id: 103,
-      title: "Python for Data Science",
-      description: "Master Python libraries like Pandas, NumPy, and Matplotlib for data analysis.",
-    },
-    {
-      id: 104,
-      title: "Mobile App Development with Flutter",
-      description: "Create beautiful cross-platform apps for iOS and Android using Flutter & Dart.",
-    },
-    {
-      id: 105,
-      title: "Cybersecurity Fundamentals",
-      description: "Protect systems and networks from digital attacks. Learn hacking techniques & defense.",
-    },
-    {
-      id: 106,
-      title: "Digital Marketing Strategy",
-      description: "Grow any business with SEO, SEM, social media, and content marketing techniques.",
-    },
-    {
-      id: 107,
-      title: "AI & Machine Learning",
-      description: "Deep dive into neural networks, deep learning, and practical AI applications.",
-    },
-    {
-      id: 108,
-      title: "Cloud Architecture with AWS",
-      description: "Design and deploy scalable, reliable, and secure applications on Amazon Web Services.",
-    },
-  ];
-
-  for (const course of courses) {
-    await prisma.subject.upsert({
-      where: { id: course.id },
-      update: {
-        title: course.title,
-        description: course.description,
-        isPublished: true,
-      },
-      create: {
-        id: course.id,
-        title: course.title,
-        description: course.description,
-        isPublished: true,
-        sections: {
-          create: [
-            {
-              title: "Introduction",
-              orderIndex: 0,
-              videos: {
-                create: [
-                  {
-                    title: "Course Overview",
-                    youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                    orderIndex: 0,
-                    durationSeconds: 300,
-                  },
-                ],
-              },
+      id: 1,
+      title: "Java Basics",
+      description: "Master the fundamentals of Java programming from scratch.",
+      thumbnail: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop",
+      isPublished: true,
+      sections: {
+        create: [
+          {
+            title: "Introduction to Java",
+            orderIndex: 0,
+            videos: {
+              create: [
+                {
+                  title: "Java Full Course for Beginners",
+                  youtubeUrl: "https://www.youtube.com/watch?v=A74TOX803D0",
+                  orderIndex: 0,
+                  durationSeconds: 7200,
+                },
+              ],
             },
-          ],
-        },
+          },
+          {
+            title: "Object Oriented Programming",
+            orderIndex: 1,
+            videos: {
+              create: [
+                {
+                  title: "Java OOPs Explained",
+                  youtubeUrl: "https://www.youtube.com/watch?v=Z6D68vEdfXU",
+                  orderIndex: 0,
+                  durationSeconds: 3600,
+                },
+              ],
+            },
+          },
+        ],
       },
-    });
-  }
-
-  // Ensure demo user is enrolled in the first course
-  await prisma.enrollment.upsert({
-    where: {
-      userId_subjectId: {
-        userId: demoUser.id,
-        subjectId: 101,
-      },
-    },
-    update: {},
-    create: {
-      userId: demoUser.id,
-      subjectId: 101,
     },
   });
 
-  console.log("Seeding finished with 8 courses.");
+  // 2. Python Fundamentals Course
+  const pythonFundamentals = await prisma.subject.upsert({
+    where: { id: 2 },
+    update: {},
+    create: {
+      id: 2,
+      title: "Python Fundamentals",
+      description: "Learn Python from zero to hero and start your data science journey.",
+      thumbnail: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop",
+      isPublished: true,
+      sections: {
+        create: [
+          {
+            title: "Python Basics",
+            orderIndex: 0,
+            videos: {
+              create: [
+                {
+                  title: "Python for Beginners",
+                  youtubeUrl: "https://www.youtube.com/watch?v=rfscVS0vtbw",
+                  orderIndex: 0,
+                  durationSeconds: 3600 * 6,
+                },
+              ],
+            },
+          },
+          {
+            title: "Data Structures",
+            orderIndex: 1,
+            videos: {
+              create: [
+                {
+                  title: "Python Lists, Tuples, Dictionaries",
+                  youtubeUrl: "https://www.youtube.com/watch?v=wj9fP18M6j8",
+                  orderIndex: 0,
+                  durationSeconds: 1200,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  console.log("Seeding complete!");
 }
 
 main()
